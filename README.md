@@ -1,2 +1,2 @@
-# teamJ_frontend
-This is the repository for the frontend part of Team J's Capstone Project Fall Semester 2024
+# Insta Chord
+This is the repository for the frontend part of Team J's Capstone Project Fall Semester 2024!
