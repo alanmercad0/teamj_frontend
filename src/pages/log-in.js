@@ -6,6 +6,27 @@ export default function LogIn() {
     const router = useRouter()
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false)
+
+  async function login(){
+    setLoading(true)
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.Error) router.push("/");
+      })
+      .catch((e) => console.log(e));
+    setLoading(false)
+  }
 
 
   return (
@@ -28,7 +49,10 @@ export default function LogIn() {
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="flex p-3 justify-center text-white font-bold bg-primary w-full rounded-3xl hover:bg-app-black">
+        <button
+          className="flex p-3 justify-center text-white font-bold bg-primary w-full rounded-3xl hover:bg-app-black"
+          onClick={async () => await login()}
+        >
           Log In
         </button>
         <div className="flex flex-row gap-2">

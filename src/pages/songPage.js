@@ -1,4 +1,5 @@
 // src/pages/sliderPage.js
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { FaArrowRight, FaArrowLeft } from 'react-icons/fa'; // Ensure this import is correct
 
@@ -22,6 +23,8 @@ export default function SliderPage() {
     setSliderOpen(!isSliderOpen);
   };
 
+  const router = useRouter()
+
   return (
     <div>
       {/* Head */}
@@ -44,6 +47,7 @@ export default function SliderPage() {
                   borderColor: '#007AFF',
                 }}
                 className="hover:bg-primary hover:border-white text-primary hover:text-white"
+                onClick={() => router.push("/sign-up")}
               >
                 Sign Up
               </button>
