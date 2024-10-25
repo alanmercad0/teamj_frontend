@@ -1,9 +1,73 @@
-import React from 'react'
+import React, { useState } from 'react'
+import Input from '../../components/Input';
+import { useRouter } from 'next/router';
 
 export default function SignUp() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
+  const [dob, setDOB] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const router = useRouter()
+
+
   return (
-    <div className="flex w-screen h-screen bg-signin_bg">
-        hello
+    <div className="flex w-screen h-screen bg-app-signin items-center justify-center bg-gradient-to-tl from-main_bg via-primary to-app-black">
+      <div className="flex flex-col items-center p-14 bg-white rounded-xl drop-shadow-lg text-black gap-5 min-w-[533px]">
+        <h1 className="font-bold text-[35px]">Sign Up</h1>
+        <div className="text-[18px] -mt-4">
+          Enter your details and start learning!
+        </div>
+        <input
+          className="border-b-2 p-2 w-full"
+          value={firstName}
+          placeholder="First Name"
+          onChange={(e) => setFirstName(e.target.value)}
+        />
+        <input
+          className="border-b-2 p-2 w-full"
+          value={lastName}
+          placeholder="Last Name"
+          onChange={(e) => setLastName(e.target.value)}
+        />
+        <input
+          className="border-b-2 p-2 w-full"
+          value={username}
+          placeholder="Username"
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          className="border-b-2 p-2 w-full"
+          value={dob}
+          placeholder="Date of Birth"
+          onChange={(e) => setDOB(e.target.value)}
+        />
+        <input
+          className="border-b-2 p-2 w-full"
+          value={password}
+          placeholder="Password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          className="border-b-2 p-2 w-full"
+          value={confirmPass}
+          placeholder="Confirm Password"
+          onChange={(e) => setConfirmPass(e.target.value)}
+        />
+        <button className="flex p-3 justify-center text-white font-bold bg-primary w-full rounded-3xl mt-2 hover:bg-app-black">
+          Sign Up
+        </button>
+        <div className="flex flex-row gap-2">
+          <div>Already have an account?</div>
+          <button
+            className="font-bold underline"
+            onClick={() => router.push("/log-in")}
+          >
+            Log In
+          </button>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

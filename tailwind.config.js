@@ -14,7 +14,11 @@ module.exports = {
         header_bg: "#2E2E30",
         primary: "#007AFF",
         accent: '#ff6100',
-        signin_bg: '#CECECE'
+        signin_bg: '#CECECE',
+        app: {
+          signin: '#CECECE',
+          black: '#2E2E30'
+        }
       },
     },
   },
