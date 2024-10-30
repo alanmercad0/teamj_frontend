@@ -6,7 +6,9 @@ npm run dev
 ```
 
 ### Tools and frameworks used:
-
+- Next.js: https://nextjs.org
+- React Piano: https://github.com/kevinsqi/react-piano
+- tailwindcss: https://tailwindcss.com 
 
 
 ## Members:
