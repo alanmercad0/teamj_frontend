@@ -95,14 +95,24 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  async function getChords(){
-    setLoading(true)
-    const getInfo = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/process_song?ytb_url=${ytbLink}`
-    );
-    const info = await getInfo.json()
-    console.log(info)
-    setLoading(false)
+  async function getChords() {
+    setLoading(true);
+    try {
+      const getInfo = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/process_song?ytb_url=${ytbLink}`
+      );
+      const info = await getInfo.json();
+  
+      // Navigate to the new page with info as query parameters
+      router.push({
+        pathname: '/result',
+        query: { info: JSON.stringify(info) }, // Pass info as a string
+      });
+    } catch (error) {
+      console.error("Error fetching chords:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
 
