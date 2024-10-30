@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import { KeyboardShortcuts, MidiNumbers, Piano } from "react-piano";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Header from "../../components/Header";
+import Head from "next/head";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -102,12 +104,10 @@ export default function Home() {
         `${process.env.NEXT_PUBLIC_API_URL}/process_song?ytb_url=${ytbLink}`
       );
       const info = await getInfo.json();
+      const { id } = info;
   
       // Navigate to the new page with info as query parameters
-      router.push({
-        pathname: '/result',
-        query: { info: JSON.stringify(info) }, // Pass info as a string
-      });
+      router.push(`/result?id=${id}`);
     } catch (error) {
       console.error("Error fetching chords:", error);
     } finally {
@@ -117,52 +117,22 @@ export default function Home() {
 
 
   return (
-    <div>
-      {/* Head  */}
-      <div className="h-screen bg-main_bg bg-gradient-to-bl from-main_bg via-gray-400 to-primary">
-        {/* Header  */}
-        <div className="w-full bg-header_bg sticky p-6 flex flex-row justify-between items-center">
-          <div className="text-lg font-bold">CHORDMATE</div>
-          <div className="flex flex-row items-center w-1/2 gap-20 justify-end md:gap-10 sm:gap-2">
-            <div className="flex flex-row gap-5">
-              <div>main</div>
-              <div>recommendation</div>
-            </div>
-            <div className="flex flex-row gap-8 md:gap-5 sm:gap-2">
-              <button
-                style={{
-                  width: "142px",
-                  height: "42px",
-                  borderRadius: "25px",
-                  borderWidth: "1px",
-                  borderColor: "#007AFF",
-                }}
-                className="hover:bg-primary hover:border-white text-primary hover:text-white"
-                onClick={() => router.push("/sign-up")}
-              >
-                Sign Up
-              </button>
-              <button
-                style={{
-                  width: "142px",
-                  height: "42px",
-                  borderRadius: "25px",
-                  borderWidth: "1px",
-                }}
-                className="bg-primary border-primary hover:border-black hover:bg-black hover:border-white text-white hover:text-primary"
-              >
-                Log In
-              </button>
-            </div>
+    <>
+      <Head>
+        <title>Chordmate: Home</title>
+        <link rel="icon" href="/small_chordmate_icon.png" />
+      </Head>
+      <div>
+        {/* Head  */}
+        <div className="h-screen bg-main_bg bg-gradient-to-bl from-main_bg via-gray-400 to-primary">
+          <Header />
+
+          {/* Text */}
+          <div className="flex text-white font-bold text-2xl self-center w-full justify-center pt-28">
+            Start learning your favorite songs on your favorite instrument here!
           </div>
-        </div>
 
-        {/* Text */}
-        <div className="flex text-white font-bold text-2xl self-center w-full justify-center pt-28">
-          Start learning your favorite songs on your favorite instrument here!
-        </div>
-
-        {/* <div className="select-none">
+          {/* <div className="select-none">
           <Piano
             noteRange={{ first: firstNote, last: lastNote }}
             playNote={() => {}}
@@ -173,23 +143,24 @@ export default function Home() {
           />
         </div> */}
 
-        <div className="w-full justify-center flex pt-10 items-center">
-          <input
-            placeholder="https://youtube.com/watch?123abc456"
-            disabled={loading}
-            className="flex w-1/3 justify-center p-2 bg-white self-center rounded-l-xl text-black"
-            value={ytbLink}
-            onChange={(e) => setYtbLink(e.target.value)}
-          />
-          <button
-            disabled={loading || ytbLink == ''}
-            className="flex w-1/8 bg-primary p-2 px-5 rounded-r-xl hover:bg-black "
-            onClick={async () => await getChords()}
-          >
-            {loading ? "Loading..." : "Convert"}
-          </button>
+          <div className="w-full justify-center flex pt-10 items-center">
+            <input
+              placeholder="https://youtube.com/watch?123abc456"
+              disabled={loading}
+              className="flex w-1/3 justify-center p-2 bg-white self-center rounded-l-xl text-black"
+              value={ytbLink}
+              onChange={(e) => setYtbLink(e.target.value)}
+            />
+            <button
+              disabled={loading || ytbLink == ""}
+              className="flex w-1/8 bg-primary p-2 px-5 rounded-r-xl hover:bg-black "
+              onClick={async () => await getChords()}
+            >
+              {loading ? "Loading..." : "Convert"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
