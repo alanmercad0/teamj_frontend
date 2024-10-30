@@ -1,4 +1,4 @@
-## Chordmate Frontend Repository
+# Chordmate Frontend Repository
 
 To start the app for testing run:
 ```bash
