@@ -104,8 +104,13 @@ export default function Home() {
         `${process.env.NEXT_PUBLIC_API_URL}/process_song?ytb_url=${ytbLink}`
       );
       const info = await getInfo.json();
+
+      if(info.Error){
+        setLoading(false)
+        return
+      }
       const { id } = info;
-  
+      console.log(id)
       // Navigate to the new page with info as query parameters
       router.push(`/result?id=${id}`);
     } catch (error) {
