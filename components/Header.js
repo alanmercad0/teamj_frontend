@@ -22,7 +22,7 @@ export default function Header() {
           <div className="cursor-pointer" onClick={() => router.push("/")}>
             main
           </div>
-          <div className="cursor-pointer" onClick={() => router.push("/")}>
+          <div className="cursor-pointer" onClick={() => router.push("/recommendation")}>
             recommendation
           </div>
         </div>

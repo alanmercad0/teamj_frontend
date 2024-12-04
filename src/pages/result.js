@@ -71,6 +71,8 @@ function getChordProgression(data, chordType) {
 //   };
 // }
 
+
+
 export async function getServerSideProps({ query }) {
   const { id } = query;
   // console.log(id)
@@ -86,6 +88,10 @@ export default function SliderPage({id}) {
   // const { info, id } = router.query;
 
   const [isSliderOpen, setSliderOpen] = useState(true);
+  const [isLoaded, setLoaded] = useState(false);
+  const [recommendations, setRecommendations] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
+  const [recommendationsOnline, setRecommendationsOnline] = useState(false);
   const [currentSong, setCurrentSong] = useState('Song Title Placeholder');
   const [currentArtist, setCurrentArtist] = useState('Artist Placeholder');
   const [chordProgression, setChordProgression] = useState([]);
@@ -175,9 +181,11 @@ export default function SliderPage({id}) {
       setChordProgression(progression);
       setCurrentArtist(artist)
       setCurrentSong(title)
+      setLoaded(true);
     }
     getInfo()
   }, []);
+
 
 
   // Update elapsed time every second
@@ -247,6 +255,59 @@ export default function SliderPage({id}) {
     return res
   }
   // console.log(makeChordArr()); 
+
+  useEffect(() => {
+    const getRecommendations = async (title, genre, artist) => {
+      if (isLoaded) {
+        try {
+          const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/getRecommendations`);
+          const params = { title, genre, artist };
+          url.search = new URLSearchParams(params).toString();
+  
+          const response = await fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+  
+          const data = await response.json();
+          console.log(data); // Log the data for debugging
+  
+          const tracks = Object.keys(data.track_name).map((trackId) => ({
+            track_name: data.track_name[trackId],
+            genre: data.track_genre[trackId],
+            artist: data.artists[trackId],
+            popularity: data.popularity[trackId],
+            similarity: data.similarity[trackId],
+            // youtube_link: data.youtube_links[trackId], // Optional
+          }));
+  
+          // Save the recommendations to localStorage
+          localStorage.setItem("recommendationsData", JSON.stringify(tracks));
+          setRecommendationsOnline(true);
+          
+        } catch (e) {
+          console.error(e); // Handle error
+        }
+      }
+    };
+  
+    getRecommendations(currentSong, "Hip-Hop/Rap", currentArtist);
+  }, [isLoaded]);
+
+  useEffect(() => {
+    if (recommendationsOnline) {
+      // Show the popup for 5 seconds
+      setShowPopup(true);
+      const timer = setTimeout(() => {
+        setRecommendationsOnline(false);
+        setShowPopup(false);  // Hide the popup after 5 seconds
+      }, 5000);  // 5000 milliseconds = 5 seconds
+      // Cleanup the timer in case the component is unmounted
+      return () => clearTimeout(timer);
+    }
+  }, [recommendationsOnline]);
 
   return (
     <>
@@ -356,6 +417,14 @@ export default function SliderPage({id}) {
             </div>
           )}
         </div>
+        {/* Pop-up for recommendations */}
+        {showPopup && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <p className="text-gray-400 font-bold">Recommendations are available!</p>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
