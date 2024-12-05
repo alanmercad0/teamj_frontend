@@ -1,10 +1,13 @@
 import { useRouter } from "next/router";
-import { useEffect, useState, useRef, act } from "react";
-import { FaArrowRight, FaArrowLeft, FaPlay, FaPause, FaFastBackward } from 'react-icons/fa';
+import { useEffect, useState, useRef, act, useMemo } from "react";
+import { FaArrowRight, FaArrowLeft, FaPlay, FaPause, FaFastBackward, FaHeart } from 'react-icons/fa';
 import Header from "../../components/Header";
 import Head from "next/head";
 import Image from "next/image";
 import { KeyboardShortcuts, MidiNumbers, Piano } from "react-piano";
+import ChordDisplay from "../../components/ChordDisplay";
+import { onAuthChange } from "../../utils/firebaseFunctions";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 
 // Helper function to get chord progression
 function getChordProgression(data, chordType) {
@@ -81,10 +84,10 @@ export async function getServerSideProps({ query }) {
   };
 }
 
-export default function SliderPage({id}) {
+export default function SliderPage({ id }) {
   const router = useRouter();
   // const { info, id } = router.query;
-
+  const [autoplay, setAutoplay] = useState(false)
   const [isSliderOpen, setSliderOpen] = useState(true);
   const [currentSong, setCurrentSong] = useState('Song Title Placeholder');
   const [currentArtist, setCurrentArtist] = useState('Artist Placeholder');
@@ -105,6 +108,8 @@ export default function SliderPage({id}) {
   const [activeNotes, setActiveNotes] = useState([0, 0, 0]);
   const [innerWidth, setInnerWidth] = useState(1)
   const [paused, setPaused] = useState(true)
+  const [liked, setLiked] = useState(false)
+  const [uid, setUid] = useState(0)
 
   function getMajorMidiArr(pos){
     return [60 + pos, 64 + pos, 67 + pos]
@@ -133,34 +138,30 @@ export default function SliderPage({id}) {
     }
   },[])
 
-  // Parse the chords data passed as a query parameter
   useEffect(() => {
-    // if (info) {
-    //   try {
-    //     const parsedInfo = typeof info === "string" ? JSON.parse(info) : info;
-  
-    //     console.log("Parsed Info:", parsedInfo); // Log parsed info to check structure
-        
-    //     // Set the song title and artist from parsed data
-    //     setCurrentSong(parsedInfo[0][1] || 'Unknown Song Title');
-    //     setCurrentArtist(parsedInfo[0][3][0].alias || 'Unknown Artist');
-        
-    //     const songBpm = parsedInfo[1][1]?.BPM || null;
-    //     setBpm(songBpm);
-        
-    //     // Check and log chord data
-    //     console.log(parsedInfo[2] && Array.isArray(parsedInfo[1]))
-    //     const chordsData = parsedInfo[2] && Array.isArray(parsedInfo[1]) ? parsedInfo[2] : [];
-    //     console.log("Chords Data:", chordsData); // Log chord data array
-  
-    //     // Set the chord progression using the specific property
-    //     const progression = getChordProgression(chordsData, "chord_simple_pop");
-    //     setChordProgression(progression);
-    //     console.log("Chord Progression:", progression); // Log chord progression after processing
-    //   } catch (error) {
-    //     console.error("Error parsing info:", error);
-    //   }
-    // }
+    const unsubscribe = onAuthChange((user) => {
+      if (user) {
+        setUid(user.uid)
+      } else {
+        console.log("no user");
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useMemo(() => {
+    async function checkIfLiked() {
+      const check = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/checkIfLiked?id=${uid}&song_id=${id}`
+      );
+      const isLiked = await check.json();
+      if (isLiked) setLiked(true);
+    }
+    if (uid != 0) checkIfLiked();
+  }, [uid]);
+
+  // Parse the chords data passed as a query parameter
+  useMemo(() => {
     async function getInfo() {
       const getInfo = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/getSongChords?id=${id}`
@@ -176,9 +177,9 @@ export default function SliderPage({id}) {
       setCurrentArtist(artist)
       setCurrentSong(title)
     }
+
     getInfo()
   }, []);
-
 
   // Update elapsed time every second
   useEffect(() => {
@@ -213,41 +214,53 @@ export default function SliderPage({id}) {
     setSliderOpen(!isSliderOpen);
   };
 
-  function makeChordArr(){
-    const majorChords = [
-      "C",
-      "C#",
-      "D",
-      "D#",
-      "Eb",
-      "E",
-      "F",
-      "F#",
-      "G",
-      "G#",
-      "A",
-      "A#",
-      "B",
-    ];
-    const res = []
-    majorChords.map((chord, i) =>
-      res.push(
-        <div className="transition ease-in delay-100 h-[75px] p-3 opacity-50 hover:opacity-100 hover:scale-105">
-          <Piano
-            noteRange={{ first: firstNote, last: lastNote }}
-            playNote={() => {}}
-            stopNote={() => {
-              setActiveNotes(midiChordMap[chord]);
-            }}
-            activeNotes={midiChordMap[chord]}
-          />
-        </div>
-      )
-    );
-    return res
-  }
-  // console.log(makeChordArr()); 
+  // const [liked, setLiked] = useState(false);
+  const [animate, setAnimate] = useState(false); // For triggering animation
 
+  const handleClick = () => {
+    if (!animate) {
+      setLiked(!liked);
+      setAnimate(true); // Trigger animation
+      setTimeout(() => setAnimate(false), 1000); // Remove animation class after it completes
+    } // Toggle liked state
+  };
+
+  async function likeSong(){
+    if(!liked && !animate){
+      setAnimate(true)
+      setLiked(true)
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/likeSong`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: uid,
+          song_id: id,
+        }),
+      });
+      setTimeout(() => setAnimate(false), 1000);
+    }
+  }
+
+  async function dislikeSong(){
+    if(liked && !animate){
+      setAnimate(true)
+      setLiked(false)
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dislikeSong`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uid: uid,
+          song_id: id,
+        }),
+      });
+      setTimeout(() => setAnimate(false), 1000);
+    }
+  }
+  
   return (
     <>
       <Head>
@@ -261,41 +274,50 @@ export default function SliderPage({id}) {
             <div
               className={`bg-gray-700 transition-all duration-300 ${
                 isSliderOpen ? "w-1/4" : "w-0"
-              } overflow-hidden`}
+              } overflow-y-scroll`}
             >
               {isSliderOpen && (
-                <div className="relative p-4">
-                  <h2 className="font-bold text-lg text-white">Image Slider</h2>
-                  <div
-                    onClick={toggleSlider}
-                    className="absolute top-4 right-4 cursor-pointer bg-gray-900 p-2 rounded-full z-10"
-                  >
-                    <FaArrowLeft className="text-white" size={24} />
+                <>
+                  <div className="relative p-4">
+                    <h2 className="font-bold text-lg text-white">
+                      Image Slider
+                    </h2>
+                    <div
+                      onClick={toggleSlider}
+                      className="sticky flex ml-[80%] -mt-[36px] top-4 w-fit cursor-pointer bg-gray-900 p-2 rounded-full z-10"
+                    >
+                      <FaArrowLeft className="text-white" size={24} />
+                    </div>
+                    <ChordDisplay activeChord={currentChord} />
                   </div>
-                  <div className="h-[100px] overflow-y-scroll">{makeChordArr()}</div>
-                  {/* <div className="transition ease-in delay-100 h-[75px] p-3 opacity-50 hover:opacity-100 hover:scale-105">
-                    <Piano
-                      noteRange={{ first: firstNote, last: lastNote }}
-                      playNote={() => {}}
-                      stopNote={() => {
-                        setActiveNotes(midiChordMap["C"]);
-                      }}
-                      activeNotes={midiChordMap["C"]}
-                    />
-                  </div> */}
-                </div>
+                </>
               )}
             </div>
 
             <div className="w-full h-full">
-              <div className="bg-gray-800 flex flex-col items-center justify-center h-[10%] min-h-[75px] w-full">
-                <h2 className="text-xl font-bold text-white">
+              <div className="relative bg-gray-800 grid items-center justify-center h-[10%] min-h-[75px] w-full">
+                <h2 className="text-xl font-bold text-white text-center">
                   {currentSong} - {currentArtist}
                 </h2>
-                <h3 className="text-md text-gray-400">
+                <h3 className="text-md text-gray-400 text-center">
                   {bpm ? `BPM: ${bpm}` : "BPM not available"}
-                </h3>{" "}
-                {/* Display BPM */}
+                </h3>
+                <div className="absolute w-fit ml-[95%]">
+                  <button
+                    className={`focus:outline-none ${
+                      animate ? "animate-grow" : ""
+                    }`}
+                    onClick={async () => {
+                      if (!liked) {
+                        await likeSong();
+                      } else {
+                        await dislikeSong();
+                      }
+                    }}
+                  >
+                    {liked ? <Favorite /> : <FavoriteBorder />}
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col items-center justify-center py-4">
                 {/* {currentChord == "D#" && (
@@ -312,9 +334,9 @@ export default function SliderPage({id}) {
                     // disabled={true}
                   />
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 text-white mt-10">
                   <FaFastBackward
-                    className="text-white cursor-pointer hover:text-primary"
+                    className="cursor-pointer hover:text-primary"
                     size={24}
                     onClick={() => {
                       elapsedTimeRef.current = 0;
@@ -323,17 +345,18 @@ export default function SliderPage({id}) {
                   />
                   {paused ? (
                     <FaPlay
-                      className="text-white cursor-pointer hover:text-primary"
+                      className="cursor-pointer hover:text-primary"
                       size={24}
                       onClick={() => setPaused(false)}
                     />
                   ) : (
                     <FaPause
-                      className="text-white cursor-pointer hover:text-primary"
+                      className="cursor-pointer hover:text-primary"
                       size={24}
                       onClick={() => setPaused(true)}
                     />
                   )}
+                  Autoplay: {autoplay ? "ON" : "OFF"}
                 </div>
                 <h1 className="mt-4 text-xl">Currently Playing Chord</h1>
                 <div>
