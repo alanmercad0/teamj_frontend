@@ -92,7 +92,7 @@ export default function LogIn() {
             {loading ? "Loading..." : "Log In"}
           </button>
           <div className="flex flex-row gap-2">
-            <div>Don't have an account?</div>
+            <div>Don&apos;t have an account?</div>
             <button
               className="font-bold underline"
               onClick={() => router.push("/sign-up")}
