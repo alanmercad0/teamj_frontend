@@ -219,7 +219,7 @@ export default function Home() {
       </Head>
       <div>
         {/* Head  */}
-        <div className="h-dvh pb-[50px] bg-main_bg bg-gradient-to-bl from-main_bg via-gray-400 to-primary">
+        <div className="h-max pb-[50px] bg-main_bg bg-gradient-to-bl from-main_bg via-gray-400 to-primary ">
           <Header />
           {/* Modal */}
           {isModalOpen && (
@@ -261,13 +261,13 @@ export default function Home() {
           )}
 
           {/* Text */}
-          <div className="flex text-white font-bold text-2xl self-center w-full justify-center pt-28">
+          <div className="flex text-white font-bold text-2xl self-center w-full justify-center pt-20">
             Enter a youtube link and
           </div>
           {/* <div className="bg-primary w-fit justify-self-center"> */}
-            <div className="flex text-white font-bold text-2xl self-center w-full justify-center ">
-              find your chords!
-            </div>
+          <div className="flex text-white font-bold text-2xl self-center w-full justify-center ">
+            find your chords!
+          </div>
           {/* </div> */}
           <div className="w-full justify-center flex pt-10 items-center">
             <input
@@ -305,21 +305,23 @@ export default function Home() {
               {error}
             </div>
           )}
-          <YouTube
-            videoId={codeForPlayer}
-            onReady={onReady}
-            opts={{
-              playerVars: {
-                autoplay: 1,
-                modestbranding: 1, // Minimize YouTube branding
-                fs: 0, // Disable the fullscreen button
-              },
-            }}
-            className={
-              "video-container w-full flex justify-center pt-[20px] transition duration-150 ease-in-out " +
-              (codeForPlayer ? "scale-100 " : "scale-0 ")
-            }
-          />
+          <div className="mb-[50px]">
+            <YouTube
+              videoId={codeForPlayer}
+              onReady={onReady}
+              opts={{
+                playerVars: {
+                  autoplay: 1,
+                  modestbranding: 1, // Minimize YouTube branding
+                  fs: 0, // Disable the fullscreen button
+                },
+              }}
+              className={
+                "video-container w-full flex justify-center pt-[20px] transition duration-150 ease-in-out " +
+                (codeForPlayer ? "scale-100 " : "scale-0 ")
+              }
+            />
+          </div>
         </div>
       </div>
     </>

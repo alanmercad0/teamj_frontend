@@ -18,40 +18,34 @@ export default function Header() {
 
 
   return (
-    <div
-      className="w-full bg-header_bg sticky p-4 flex flex-row justify-between items-center"
-      style={{ justifyContent: "space-between", backgroundColor: "#2E2E30" }}
-    >
+    <div className="w-full bg-header_bg sticky p-4 flex flex-row justify-between items-center z-50 justify-between bg-[#2E2E30]">
       <div
-        className="text-lg font-bold cursor-pointer"
+        className="flex items-center gap-4 cursor-pointer"
         onClick={() => router.push("/")}
       >
-        CHORDMATE
+        <img
+          src="/small_chordmate_icon.png"
+          className="object-contain rounded-lg w-[15%]"
+        />
+        <div className="text-lg font-bold ">CHORDMATE</div>
       </div>
-      <div
-        className="flex flex-row items-center w-1/2 gap-20 justify-end md:gap-10 sm:gap-2"
-        style={{ gap: 20 }}
-      >
+      <div className="flex flex-row items-center w-1/2 gap-20 justify-end md:gap-10 sm:gap-2 ">
         <div className="flex flex-row gap-5">
           <div className="cursor-pointer" onClick={() => router.push("/")}>
             main
           </div>
-          <div className="cursor-pointer" onClick={() => router.push("/recommendation")}>
+          <div
+            className="cursor-pointer"
+            onClick={() => router.push("/recommendation")}
+          >
             recommendation
           </div>
         </div>
         {user ? (
           <>
             <button
-              className="hover:bg-black"
-              style={{
-                height: "50px",
-                width: "50px",
-                // backgroundColor: "blue",
-                borderWidth: "2px",
-                borderColor: "#007AFF",
-                borderRadius: "50px",
-              }}
+              className="hover:bg-black w-[50px] h-[50px] border-2 border-[#007AFF] rounded-full"
+              onClick={() => router.push("/profile/2")}
             />
           </>
         ) : (
@@ -60,22 +54,17 @@ export default function Header() {
             style={{ gap: 8 }}
           >
             <button
-              style={{
-                width: "142px",
-                height: "42px",
-                borderRadius: "25px",
-                borderWidth: "1px",
-              }}
-              className="bg-primary border-primary hover:border-black hover:bg-black text-white hover:text-primary"
+              className="transition duration-300 bg-primary hover:bg-black text-white w-[142px] h-[42px] rounded-[25px]"
               onClick={() => router.push("/sign-up")}
             >
               Sign Up
             </button>
             <button
-              className="hover:border-white text-primary hover:text-white"
+              className="relative group overflow-hidden flex border-2 border-indigo-300 items-center justify-center w-[142px] h-[42px] rounded-[25px]"
               onClick={() => router.push("/log-in")}
             >
-              Log In
+              <span className="absolute inset-0 bg-gradient-to-r from-blue-200 via-indigo-300 to-purple-300 transition-transform duration-[400ms] ease-in-out transform scale-x-0 group-hover:scale-x-100 origin-left"></span>
+              <span className="relative z-10 ">Log In</span>
             </button>
           </div>
         )}

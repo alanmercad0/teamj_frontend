@@ -32,17 +32,17 @@ export default function RecommendationPage() {
         <title>Music Recommendations</title>
         <link rel="icon" href="/small_chordmate_icon.png" />
       </Head>
-      <div className="min-h-screen bg-gradient-to-br from-blue-200 via-indigo-300 to-purple-400 text-white">
+      <div className="min-h-screen h-fit bg-gradient-to-br from-blue-200 via-indigo-300 to-purple-400 text-white">
         <Header />
 
         {/* Title */}
-        <div className="flex text-white font-bold text-3xl justify-center pt-16 mb-8">
+        <div className="flex text-white font-bold text-3xl justify-center pt-8 mb-2">
           Discover New Music Based on Your Favorites
         </div>
 
         {/* Recommendation Table */}
         {recommendations.length > 0 ? (
-          <div className="overflow-x-auto w-full pt-10 px-6">
+          <div className="overflow-x-auto w-full pt-10 px-6 pb-[100px]">
             <table className="w-full max-w-4xl mx-auto text-sm bg-white rounded-xl shadow-lg">
               <thead>
                 <tr className="bg-blue-500 text-white">
