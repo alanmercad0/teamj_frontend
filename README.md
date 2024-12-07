@@ -1,4 +1,8 @@
 # Chordmate Frontend Repository
+Pre-requisite for running app:
+```bash
+npm install
+```
 
 To start the app for testing run:
 ```bash
