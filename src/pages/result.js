@@ -97,6 +97,7 @@ export default function SliderPage({ id }) {
   const [notification, setNotification] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [recommendationsOnline, setRecommendationsOnline] = useState(false);
+  const [userOnline, setUserOnline] = useState(false);
   const [currentSong, setCurrentSong] = useState('Song Title Placeholder');
   const [currentArtist, setCurrentArtist] = useState('Artist Placeholder');
   const [chordProgression, setChordProgression] = useState([]);
@@ -118,7 +119,7 @@ export default function SliderPage({ id }) {
   const [paused, setPaused] = useState(true)
   const [liked, setLiked] = useState(false)
   const [uid, setUid] = useState(0)
-  const [recommendationsDict, setRecommendationsDict] = useState({});
+  const [recommendations, setRecommendations] = useState('');
   const [isLoaded, setLoaded] = useState(false)
 
   function getMajorMidiArr(pos){
@@ -152,6 +153,7 @@ export default function SliderPage({ id }) {
     const unsubscribe = onAuthChange((user) => {
       if (user) {
         setUid(user.uid)
+        setUserOnline(true);
       } else {
         console.log("no user");
       }
@@ -296,18 +298,10 @@ export default function SliderPage({ id }) {
             popularity: recommendationsData.popularity[key],
             similarity: recommendationsData.similarity[key],
           }));
-
-          const newRecommendationsDict = forRecommendations.reduce((acc, item) => {
-            acc[item.track_name] = item;
-            return acc;
-          }, {});
   
-          setRecommendationsDict(newRecommendationsDict);
+          localStorage.setItem("recommendationsLData", JSON.stringify(forRecommendations));
           
-          console.log("Fetched formatted:", forRecommendations);
-          console.log("Single dictionary:", recommendationsDict);
-          
-          if (forRecommendations) {
+          if (localStorage.getItem("recommendationsLData")) {
             console.log("Recommendations are available.");
             setRecommendationsOnline(true);
           } else {
@@ -325,49 +319,112 @@ export default function SliderPage({ id }) {
     getRecommendations(currentSong, currentArtist);
   }, [currentSong, currentArtist]);
 
-  const RecommendationsTable = ({ forRecommendations }) => (
-    <div className="recommendations-modal">
-      <h3>Recommendations</h3>
-      <div className="overflow-x-auto w-full pt-10 px-6 pb-[100px]">
-        <table className="w-full max-w-4xl mx-auto text-sm bg-white rounded-xl shadow-lg">
-          <thead>
-            <tr className="bg-blue-500 text-white">
-              <th className="p-2 text-left">Track Name</th>
-              <th className="p-2 text-left">Genre</th>
-              <th className="p-2 text-left">Artist</th>
-              <th className="p-2 text-left">Popularity</th>
-              <th className="p-2 text-left">Similarity</th>
-            </tr>
-          </thead>
-          <tbody>
-          {forRecommendations.map((item, index)  => (
-            <tr key={index}>
-              <td className="py-2 px-4 border-b">{item.track_name}</td>
-              <td className="py-2 px-4 border-b">{item.artists}</td>
-              <td className="py-2 px-4 border-b">{item.track_genre}</td>
-              <td className="py-2 px-4 border-b">{item.popularity}</td>
-              <td className="py-2 px-4 border-b">{item.similarity}</td>
-            </tr>
-          ))}
-        </tbody>
-        </table>
+  const RecommendationsTable = ({ recommendations }) => (
+    <div
+      className="recommendations-modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      style={{ backdropFilter: "blur(5px)" }}
+    >
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl mx-auto">
+        <h3 className="text-lg font-semibold text-center bg-blue-500 text-white py-4">
+          Recommendations
+        </h3>
+        <div className="overflow-y-auto max-h-[70vh]">
+          <table className="w-full text-sm bg-white">
+            <thead>
+              <tr className="bg-blue-500 text-white">
+                <th className="p-3 text-left">Track Name</th>
+                <th className="p-3 text-left">Genre</th>
+                <th className="p-3 text-left">Artist</th>
+                <th className="p-3 text-left">Popularity</th>
+                <th className="p-3 text-left">Similarity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Array.isArray(recommendations) && recommendations.length > 0 ? (
+                recommendations.map((item, index) => (
+                  <tr
+                    key={index}
+                    className={`${
+                      index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } hover:bg-gray-100`}
+                  >
+                    <td className="p-3 text-black">{item.track_name}</td>
+                    <td className="p-3 text-black">{item.genre}</td>
+                    <td className="p-3 text-black">{item.artist}</td>
+                    <td className="p-3 text-black">{item.popularity}</td>
+                    <td className="p-3 text-black">{item.similarity}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center text-gray-500 py-4">
+                    No recommendations available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <button
+          className="block w-full text-center bg-blue-500 text-white py-3 font-semibold hover:bg-blue-600"
+          onClick={handleCloseModal}
+        >
+          Close
+        </button>
       </div>
-      </div>
+    </div>
   );
 
   useEffect(() => {
-    // Trigger the popup when recommendations become available
     if (recommendationsOnline) {
       setShowPopup(true);
-  
       const timer = setTimeout(() => setShowPopup(false), 10000);
-  
-      return () => clearTimeout(timer); // Cleanup timeout
+      return () => clearTimeout(timer);
     }
   }, [recommendationsOnline]);
 
+  useEffect(() => {
+      if (recommendationsOnline && userOnline) {
+        const storedRecommendations = JSON.parse(localStorage.getItem("recommendationsLData"));
+        console.log("Stored for Storing:", storedRecommendations);
+  
+        if (storedRecommendations && storedRecommendations.length > 0) {
+          storedRecommendations.forEach(async (item, index) => {
+            const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/setRecommendationHistory`);
+            const params = {
+              uid,
+              title: item.track_name,
+              artist: item.artist,
+              genre: item.genre,
+              popularity: item.popularity
+            };
+            url.search = new URLSearchParams(params).toString();
+  
+            try {
+              const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
+  
+              if (response.ok) {
+                console.log(`Successfully stored recommendation ${index + 1}`);
+              } else {
+                console.error(`Failed to store recommendation ${index + 1}:`, response.statusText);
+              }
+            } catch (error) {
+              console.error(`Error storing recommendation ${index + 1}:`, error);
+            }
+          });
+        }
+      }
+    }, [recommendationsOnline, uid, userOnline]);
+
   const handleRecClick = () => {
-    if (recommendationsOnline){
+    const storedRecommendations = JSON.parse(localStorage.getItem("recommendationsLData"));
+    if (recommendationsOnline && Array.isArray(storedRecommendations)) {
+      setRecommendations(storedRecommendations);
       setShowRecommendations(true);
     } else {
       setNotification("Recommendations are currently unavailable.");
@@ -523,7 +580,7 @@ export default function SliderPage({ id }) {
         {showRecommendations && (
           <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-30">
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <RecommendationsTable data={formattedRecommendations} />
+            <RecommendationsTable recommendations={recommendations} />
               <button onClick={handleCloseModal} className="mt-4 px-4 py-2 bg-primary text-white rounded">
                 Close
               </button>

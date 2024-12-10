@@ -17,7 +17,7 @@ const geistMono = localFont({
 });
 
 export default function RecommendationPage() {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,6 +43,8 @@ export default function RecommendationPage() {
         }
       } else {
         console.log("no user");
+        setUser(null);
+        setLoading(false);
       }
     });
     return () => unsubscribe();
@@ -62,13 +64,23 @@ export default function RecommendationPage() {
   }
 
   if (error) {
-    return <div className="flex justify-center pt-10"><p className="text-lg text-white">Error: {error}</p></div>;
+    return (
+      <div>
+        <Header />
+        <div className="flex justify-center pt-10 bg-gradient-to-br from-blue-200 via-indigo-300 to-purple-400 text-white min-h-screen">
+          <p className="text-lg text-white">Error: {error}</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
     return (
-      <div className="flex justify-center pt-10">
-        <p className="text-lg text-white">Please log in to view your recommendations.</p>
+      <div>
+        <Header />
+        <div className="flex justify-center pt-10 bg-gradient-to-br from-blue-200 via-indigo-300 to-purple-400 text-white min-h-screen">
+          <p className="text-lg">No user to see history, please log in or register to start saving the recommendations.</p>
+        </div>
       </div>
     );
   }
@@ -115,7 +127,6 @@ export default function RecommendationPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center pt-10">
-            <img src="/images/no-history.png" alt="No history" className="w-32 h-32" />
             <p className="text-lg text-white mt-4">No recommendations available.</p>
           </div>
         )}
