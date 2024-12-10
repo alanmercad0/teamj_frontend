@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState, useRef, act, useMemo } from "react";
+import { useEffect, useState, useRef, act, useMemo, Suspense, lazy } from "react";
 import { FaArrowRight, FaArrowLeft, FaPlay, FaPause, FaFastBackward, FaHeart } from 'react-icons/fa';
 import Header from "../../components/Header";
 import Head from "next/head";
@@ -18,6 +18,8 @@ function getChordProgression(data, chordType) {
     end: chord.end
   }));
 }
+
+
 
 // Timer component
 // function Timer({ onBpmUpdate }) {
@@ -90,9 +92,9 @@ export default function SliderPage({ id }) {
   const router = useRouter();
   // const { info, id } = router.query;
   const [autoplay, setAutoplay] = useState(false)
+  const [showRecommendations, setShowRecommendations] = useState(false);
   const [isSliderOpen, setSliderOpen] = useState(true);
-  const [isLoaded, setLoaded] = useState(false);
-  const [recommendations, setRecommendations] = useState([]);
+  const [notification, setNotification] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [recommendationsOnline, setRecommendationsOnline] = useState(false);
   const [currentSong, setCurrentSong] = useState('Song Title Placeholder');
@@ -116,6 +118,8 @@ export default function SliderPage({ id }) {
   const [paused, setPaused] = useState(true)
   const [liked, setLiked] = useState(false)
   const [uid, setUid] = useState(0)
+  const [recommendationsDict, setRecommendationsDict] = useState({});
+  const [isLoaded, setLoaded] = useState(false)
 
   function getMajorMidiArr(pos){
     return [60 + pos, 64 + pos, 67 + pos]
@@ -182,7 +186,7 @@ export default function SliderPage({ id }) {
       setChordProgression(progression);
       setCurrentArtist(artist)
       setCurrentSong(title)
-      setLoaded(true);
+      setLoaded(true)
     }
 
     getInfo()
@@ -269,57 +273,111 @@ export default function SliderPage({ id }) {
   }
   
   useEffect(() => {
-    const getRecommendations = async (title, genre, artist) => {
-      if (isLoaded) {
+    const getRecommendations = async (title, artist) => {
+      if (isLoaded){
         try {
+          console.log("Fetching recommendations...");
           const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/getRecommendations`);
-          const params = { title, genre, artist };
+          const params = { title, artist };
           url.search = new URLSearchParams(params).toString();
-  
+    
           const response = await fetch(url, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
             },
           });
-  
-          const data = await response.json();
-          console.log(data); // Log the data for debugging
-  
-          const tracks = Object.keys(data.track_name).map((trackId) => ({
-            track_name: data.track_name[trackId],
-            genre: data.track_genre[trackId],
-            artist: data.artists[trackId],
-            popularity: data.popularity[trackId],
-            similarity: data.similarity[trackId],
-            // youtube_link: data.youtube_links[trackId], // Optional
+    
+          const recommendationsData = await response.json();
+          const forRecommendations = Object.keys(recommendationsData.track_name).map((key) => ({
+            track_name: recommendationsData.track_name[key],
+            genre: recommendationsData.track_genre[key],
+            artist: recommendationsData.artists[key],
+            popularity: recommendationsData.popularity[key],
+            similarity: recommendationsData.similarity[key],
           }));
+
+          const newRecommendationsDict = forRecommendations.reduce((acc, item) => {
+            acc[item.track_name] = item;
+            return acc;
+          }, {});
   
-          // Save the recommendations to localStorage
-          localStorage.setItem("recommendationsData", JSON.stringify(tracks));
-          setRecommendationsOnline(true);
+          setRecommendationsDict(newRecommendationsDict);
           
-        } catch (e) {
-          console.error(e); // Handle error
-        }
+          console.log("Fetched formatted:", forRecommendations);
+          console.log("Single dictionary:", recommendationsDict);
+          
+          if (forRecommendations) {
+            console.log("Recommendations are available.");
+            setRecommendationsOnline(true);
+          } else {
+            console.log("No recommendations found.");
+            setRecommendationsOnline(false);
+          }
+        } 
+      catch (error) {
+        console.error("Error fetching recommendations:", error);
+        setRecommendationsOnline(false);
       }
+    }
     };
   
-    getRecommendations(currentSong, "Hip-Hop/Rap", currentArtist);
-  }, [isLoaded]);
+    getRecommendations(currentSong, currentArtist);
+  }, [currentSong, currentArtist]);
+
+  const RecommendationsTable = ({ forRecommendations }) => (
+    <div className="recommendations-modal">
+      <h3>Recommendations</h3>
+      <div className="overflow-x-auto w-full pt-10 px-6 pb-[100px]">
+        <table className="w-full max-w-4xl mx-auto text-sm bg-white rounded-xl shadow-lg">
+          <thead>
+            <tr className="bg-blue-500 text-white">
+              <th className="p-2 text-left">Track Name</th>
+              <th className="p-2 text-left">Genre</th>
+              <th className="p-2 text-left">Artist</th>
+              <th className="p-2 text-left">Popularity</th>
+              <th className="p-2 text-left">Similarity</th>
+            </tr>
+          </thead>
+          <tbody>
+          {forRecommendations.map((item, index)  => (
+            <tr key={index}>
+              <td className="py-2 px-4 border-b">{item.track_name}</td>
+              <td className="py-2 px-4 border-b">{item.artists}</td>
+              <td className="py-2 px-4 border-b">{item.track_genre}</td>
+              <td className="py-2 px-4 border-b">{item.popularity}</td>
+              <td className="py-2 px-4 border-b">{item.similarity}</td>
+            </tr>
+          ))}
+        </tbody>
+        </table>
+      </div>
+      </div>
+  );
 
   useEffect(() => {
+    // Trigger the popup when recommendations become available
     if (recommendationsOnline) {
-      // Show the popup for 5 seconds
       setShowPopup(true);
-      const timer = setTimeout(() => {
-        setRecommendationsOnline(false);
-        setShowPopup(false);  // Hide the popup after 5 seconds
-      }, 5000);  // 5000 milliseconds = 5 seconds
-      // Cleanup the timer in case the component is unmounted
-      return () => clearTimeout(timer);
+  
+      const timer = setTimeout(() => setShowPopup(false), 10000);
+  
+      return () => clearTimeout(timer); // Cleanup timeout
     }
   }, [recommendationsOnline]);
+
+  const handleRecClick = () => {
+    if (recommendationsOnline){
+      setShowRecommendations(true);
+    } else {
+      setNotification("Recommendations are currently unavailable.");
+      setTimeout(() => setNotification(null), 3000);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowRecommendations(false);
+  };
 
   return (
     <>
@@ -337,25 +395,29 @@ export default function SliderPage({ id }) {
               } overflow-y-scroll`}
             >
               {isSliderOpen && (
-                <>
-                  <div className="relative p-4">
-                    <h2 className="font-bold text-lg text-white">
-                      Image Slider
-                    </h2>
-                    <div
-                      onClick={toggleSlider}
-                      className="sticky flex ml-[80%] -mt-[36px] top-4 w-fit cursor-pointer bg-gray-900 p-2 rounded-full z-10"
-                    >
-                      <FaArrowLeft className="text-white" size={24} />
-                    </div>
-                    <ChordDisplay activeChord={currentChord} />
+                <div className="relative p-4">
+                  <h2 className="font-bold text-lg text-white">Image Slider</h2>
+                  <div
+                    onClick={toggleSlider}
+                    className="sticky flex ml-[80%] -mt-[36px] top-4 w-fit cursor-pointer bg-gray-900 p-2 rounded-full z-10"
+                  >
+                    <FaArrowLeft className="text-white" size={24} />
                   </div>
-                </>
+                  <ChordDisplay activeChord={currentChord} />
+                </div>
               )}
             </div>
-
+  
             <div className="w-full h-full">
               <div className="relative bg-gray-800 grid items-center justify-center h-[10%] min-h-[75px] w-full">
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                  <button
+                    onClick={handleRecClick}
+                    className="bg-primary text-white px-4 py-2 rounded hover:bg-secondary transition duration-300"
+                  >
+                    Recommendations
+                  </button>
+                </div>
                 <h2 className="text-xl font-bold text-white text-center">
                   {currentSong} - {currentArtist}
                 </h2>
@@ -364,9 +426,7 @@ export default function SliderPage({ id }) {
                 </h3>
                 <div className="absolute w-fit ml-[95%]">
                   <button
-                    className={`focus:outline-none ${
-                      animate ? "animate-grow" : ""
-                    }`}
+                    className={`focus:outline-none ${animate ? "animate-grow" : ""}`}
                     onClick={async () => {
                       if (!liked) {
                         await likeSong();
@@ -380,8 +440,6 @@ export default function SliderPage({ id }) {
                 </div>
               </div>
               <div className="flex flex-col items-center justify-center py-4">
-                {/* {currentChord == "D#" && (
-                )} */}
                 <div className="py-0">
                   <Piano
                     noteRange={{ first: firstNote, last: lastNote }}
@@ -390,8 +448,7 @@ export default function SliderPage({ id }) {
                       setActiveNotes(midiChordMap[currentChord]);
                     }}
                     width={innerWidth / 2}
-                    activeNotes={activeNotes} // These notes are highlighted
-                    // disabled={true}
+                    activeNotes={activeNotes} // Highlighted notes
                   />
                 </div>
                 <div className="flex gap-4 text-white mt-10">
@@ -429,7 +486,7 @@ export default function SliderPage({ id }) {
               </div>
             </div>
           </div>
-
+  
           {!isSliderOpen && (
             <div
               onClick={toggleSlider}
@@ -439,15 +496,41 @@ export default function SliderPage({ id }) {
             </div>
           )}
         </div>
-        {/* Pop-up for recommendations */}
+  
+        {/* Notification */}
+        {notification && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-md z-50">
+            {notification}
+          </div>
+        )}
+  
+        {/* Recommendations Popup */}
         {showPopup && (
           <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20">
             <div className="bg-white p-6 rounded-lg shadow-lg">
               <p className="text-gray-400 font-bold">Recommendations are available!</p>
+              <button
+                className="mt-4 px-4 py-2 bg-primary text-white rounded"
+                onClick={() => setShowPopup(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+  
+        {/* Recommendations Table */}
+        {showRecommendations && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-30">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <RecommendationsTable data={formattedRecommendations} />
+              <button onClick={handleCloseModal} className="mt-4 px-4 py-2 bg-primary text-white rounded">
+                Close
+              </button>
             </div>
           </div>
         )}
       </div>
     </>
-  );
+  );    
 }
