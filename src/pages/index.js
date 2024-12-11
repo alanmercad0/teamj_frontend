@@ -36,6 +36,7 @@ export default function Home() {
   const [uid, setUid] = useState('')
   const [error, setError] = useState('')
   const [isModalOpen, setIsModalOpen] = useState();
+  const [isUserAuthenticated,setUserAuthenticated] = useState(false)
   const [isVisible, setIsVisible] = useState(); // Tracks animation state
   const [codeForPlayer, setCodeForPlayer] = useState(false)
   const [songId, setSongId] = useState(false);
@@ -107,6 +108,24 @@ export default function Home() {
   // }, []); // Empty dependency array ensures this runs only once on mount
 
   useEffect(() => {
+      // retryCount++;
+
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth_status`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === 'success') {
+            // alert(data.message); // Notify user of success
+            console.log(data.message)
+            
+            setUserAuthenticated(true)
+            
+          } else {
+            // alert(data.message); // Notify user of failure
+            console.log(data.message)
+    
+            setUserAuthenticated(false)
+          }
+      })
     const unsubscribe = onAuthChange((user) => {
       if (user) {
         setUid(user.uid)
@@ -116,6 +135,36 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, []);
+  // useEffect(()=>{
+  //   fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth_status`)
+  //   .then((response) => response.json())
+  //   .then((data) => {
+  //     if (data.status === 'success') {
+  //       // alert(data.message); // Notify user of success
+  //       console.log(data.message)
+
+  //       closeGoogleModal()
+        
+  //     } else {
+  //       // alert(data.message); // Notify user of failure
+  //       console.log(data.message)
+
+  //       openGoogleModal()
+  //     }
+  // })
+  // console.log("User Authentication changed",isUserAuthenticated)
+    
+    
+  // },[])
+  useEffect(()=>{
+    if (isUserAuthenticated == false){
+      openGoogleModal()
+    }
+    else if (isUserAuthenticated == true){
+      closeGoogleModal()
+      
+    }
+  },[isUserAuthenticated])
 
   function checkLink(link) {
     const split = link.split("v=");
@@ -197,6 +246,31 @@ export default function Home() {
     setTimeout(() => setIsModalOpen(false), 300); // Wait for animation to finish before unmounting
   };
 
+
+  const triggerAuthentication = async () => {
+
+    
+    window.location.assign(`${process.env.NEXT_PUBLIC_API_URL}/start_auth`)
+
+    // let conditionMet = false;
+
+ 
+
+
+    
+
+  };
+
+  const openGoogleModal = () => {
+    setUserAuthenticated(false); // Mount the modal
+    setTimeout(() => setIsVisible(true), 10); // Trigger fade-in animation
+  };
+
+  const closeGoogleModal = () => {
+    setIsVisible(false); // Trigger fade-out animation
+    setTimeout(() => setUserAuthenticated(true), 300); // Wait for animation to finish before unmounting
+  };
+
   const playerRef = useRef(null);
 
   const onReady = (event) => {
@@ -217,11 +291,40 @@ export default function Home() {
         <title>Chordmate: Home</title>
         <link rel="icon" href="/small_chordmate_icon.png" />
       </Head>
+     
       <div>
         {/* Head  */}
         <div className="h-max pb-[50px] bg-main_bg bg-gradient-to-bl from-main_bg via-gray-400 to-primary ">
           <Header />
           {/* Modal */}
+          {!isUserAuthenticated && (
+            <>
+              {/* Overlay */}
+              <div
+                className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 z-[999] ${
+                  isVisible ? "opacity-100" : "opacity-0"
+                }`}
+                onClick={closeModal} // Close modal on clicking overlay
+              ></div>
+
+              {/* Modal Content */}
+              <div
+                className={`fixed inset-0 flex items-center justify-center transition-all duration-300 transform z-[1000] ${
+                  isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
+                }`}
+              >
+                <div className="bg-white p-6 rounded shadow-lg relative text-black">
+                  <h2>Authentication is needed </h2>
+                      <button 
+                      className="w-full rounded-full bg-primary py-[8px] text-white font-bold mt-[30px] transition duration-300 hover:bg-black"
+                      onClick={triggerAuthentication}>
+                        <a>Authenticate</a>
+                      </button>
+                      
+                </div>
+              </div>
+            </>
+          )}
           {isModalOpen && (
             <>
               {/* Overlay */}
@@ -261,6 +364,14 @@ export default function Home() {
           )}
 
           {/* Text */}
+          {!isUserAuthenticated &&(
+            <div className="flex  text-2xl self-center w-full justify-center pt-20">Google Authentication Needed</div>
+
+          )}
+          {isUserAuthenticated &&(
+            <div className="flex  text-2xl self-center w-full justify-center pt-20">User Authenticated</div>
+
+          )}
           <div className="flex text-white font-bold text-2xl self-center w-full justify-center pt-20">
             Enter a youtube link and
           </div>

@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { onAuthChange } from "../utils/firebaseFunctions";
+import Link from 'next/link';
+
 
 export default function Header() {
   const router = useRouter();
@@ -15,6 +17,13 @@ export default function Header() {
     });
     return () => unsubscribe();
   }, []);
+
+  const triggerAuthentication = () => {
+    // fetch(
+    //   `${process.env.NEXT_PUBLIC_API_URL}/start_auth`
+    // );
+    window.open( `${process.env.NEXT_PUBLIC_API_URL}/start_auth`)
+  };
 
 
   return (
@@ -40,6 +49,12 @@ export default function Header() {
           >
             recommendation
           </div>
+          {/* <div>
+          <p>Google Authentucation is required:</p>
+          <div  onClick={triggerAuthentication}>
+            <a>Authenticate</a>
+          </div>
+        </div> */}
         </div>
         {user ? (
           <>
