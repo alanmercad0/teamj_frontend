@@ -32,7 +32,12 @@ export default function UserProfile() {
         <div className="w-full px-[5%] h-full">
           <div className="font-bold text-[45px] font-sans mb-5">Profile</div>
           <div className="w-full h-[80%] rounded-2xl p-10 flex flex-col bg-[#f0f0f0] overlow-y-auto text-black items-center justify-self-center">
-            <div className="min-w-[100px] min-h-[100px] rounded-full bg-yellow-200 border-2 border-black " />
+            <div className="min-w-[100px] min-h-[100px] rounded-full bg-yellow-200 border-2 border-black items-center flex justify-center">
+              <img
+                src="/small_chordmate_icon.png"
+                className="object-cover rounded-full w-[99px] h-[99px]"
+              />
+            </div>
             <div className="font-bold text-[25px]">
               {user?.displayName.split(";")[0]}
             </div>

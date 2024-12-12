@@ -481,20 +481,25 @@ export default function SliderPage({ id }) {
                 <h3 className="text-md text-gray-400 text-center">
                   {bpm ? `BPM: ${bpm}` : "BPM not available"}
                 </h3>
-                <div className="absolute w-fit ml-[95%]">
-                  <button
-                    className={`focus:outline-none ${animate ? "animate-grow" : ""}`}
-                    onClick={async () => {
-                      if (!liked) {
-                        await likeSong();
-                      } else {
-                        await dislikeSong();
-                      }
-                    }}
-                  >
-                    {liked ? <Favorite /> : <FavoriteBorder />}
-                  </button>
-                </div>
+
+                {uid && (
+                  <div className="absolute w-fit ml-[95%]">
+                    <button
+                      className={`focus:outline-none ${
+                        animate ? "animate-grow" : ""
+                      }`}
+                      onClick={async () => {
+                        if (!liked) {
+                          await likeSong();
+                        } else {
+                          await dislikeSong();
+                        }
+                      }}
+                    >
+                      {liked ? <Favorite /> : <FavoriteBorder />}
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col items-center justify-center py-4">
                 <div className="py-0">

@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { onAuthChange } from "../utils/firebaseFunctions";
+import Link from 'next/link';
+
 
 export default function Header() {
   const router = useRouter();
@@ -15,6 +17,13 @@ export default function Header() {
     });
     return () => unsubscribe();
   }, []);
+
+  const triggerAuthentication = () => {
+    // fetch(
+    //   `${process.env.NEXT_PUBLIC_API_URL}/start_auth`
+    // );
+    window.open( `${process.env.NEXT_PUBLIC_API_URL}/start_auth`)
+  };
 
 
   return (
@@ -40,13 +49,24 @@ export default function Header() {
           >
             recommendation
           </div>
+          {/* <div>
+          <p>Google Authentucation is required:</p>
+          <div  onClick={triggerAuthentication}>
+            <a>Authenticate</a>
+          </div>
+        </div> */}
         </div>
         {user ? (
           <>
             <button
-              className="hover:bg-black w-[50px] h-[50px] border-2 border-[#007AFF] rounded-full"
+              className="hover:ring-2 w-[50px] h-[50px] border-2 border-[#007AFF] rounded-full"
               onClick={() => router.push("/profile/2")}
-            />
+            >
+              <img
+                src="/small_chordmate_icon.png"
+                className="object-cover rounded-full w-[48px] h-[48px]"
+              />
+            </button>
           </>
         ) : (
           <div
