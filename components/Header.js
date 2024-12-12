@@ -59,9 +59,14 @@ export default function Header() {
         {user ? (
           <>
             <button
-              className="hover:bg-black w-[50px] h-[50px] border-2 border-[#007AFF] rounded-full"
+              className="hover:ring-2 w-[50px] h-[50px] border-2 border-[#007AFF] rounded-full"
               onClick={() => router.push("/profile/2")}
-            />
+            >
+              <img
+                src="/small_chordmate_icon.png"
+                className="object-cover rounded-full w-[48px] h-[48px]"
+              />
+            </button>
           </>
         ) : (
           <div

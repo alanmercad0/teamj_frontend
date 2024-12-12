@@ -362,22 +362,25 @@ export default function SliderPage({ id }) {
                 <h3 className="text-md text-gray-400 text-center">
                   {bpm ? `BPM: ${bpm}` : "BPM not available"}
                 </h3>
-                <div className="absolute w-fit ml-[95%]">
-                  <button
-                    className={`focus:outline-none ${
-                      animate ? "animate-grow" : ""
-                    }`}
-                    onClick={async () => {
-                      if (!liked) {
-                        await likeSong();
-                      } else {
-                        await dislikeSong();
-                      }
-                    }}
-                  >
-                    {liked ? <Favorite /> : <FavoriteBorder />}
-                  </button>
-                </div>
+
+                {uid && (
+                  <div className="absolute w-fit ml-[95%]">
+                    <button
+                      className={`focus:outline-none ${
+                        animate ? "animate-grow" : ""
+                      }`}
+                      onClick={async () => {
+                        if (!liked) {
+                          await likeSong();
+                        } else {
+                          await dislikeSong();
+                        }
+                      }}
+                    >
+                      {liked ? <Favorite /> : <FavoriteBorder />}
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col items-center justify-center py-4">
                 {/* {currentChord == "D#" && (
@@ -443,7 +446,9 @@ export default function SliderPage({ id }) {
         {showPopup && (
           <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20">
             <div className="bg-white p-6 rounded-lg shadow-lg">
-              <p className="text-gray-400 font-bold">Recommendations are available!</p>
+              <p className="text-gray-400 font-bold">
+                Recommendations are available!
+              </p>
             </div>
           </div>
         )}
