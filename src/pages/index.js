@@ -364,14 +364,14 @@ export default function Home() {
           )}
 
           {/* Text */}
-          {!isUserAuthenticated &&(
+          {/* {!isUserAuthenticated &&(
             <div className="flex  text-2xl self-center w-full justify-center pt-20">Google Authentication Needed</div>
 
           )}
           {isUserAuthenticated &&(
             <div className="flex  text-2xl self-center w-full justify-center pt-20">User Authenticated</div>
 
-          )}
+          )} */}
           <div className="flex text-white font-bold text-2xl self-center w-full justify-center pt-20">
             Enter a youtube link and
           </div>
