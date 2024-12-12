@@ -536,7 +536,7 @@ export default function SliderPage({ id }) {
                       onClick={() => setPaused(true)}
                     />
                   )}
-                  Autoplay: {autoplay ? "ON" : "OFF"}
+                  {/* Autoplay: {autoplay ? "ON" : "OFF"} */}
                 </div>
                 <h1 className="mt-4 text-xl">Currently Playing Chord</h1>
                 <div>
