@@ -385,10 +385,11 @@ export default function SliderPage({ id }) {
 
   useEffect(() => {
       if (recommendationsOnline && userOnline) {
-        const storedRecommendations = JSON.parse(localStorage.getItem("recommendationsLData"));
+        const storedRecommendations = JSON.parse(localStorage.getItem("recommendationsData"));
         console.log("Stored for Storing:", storedRecommendations);
   
         if (storedRecommendations && storedRecommendations.length > 0) {
+          // console.log('here')
           storedRecommendations.forEach(async (item, index) => {
             const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/setRecommendationHistory`);
             const params = {
