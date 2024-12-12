@@ -59,6 +59,7 @@ export default function RecommendationPage() {
             <p className="text-lg">Loading recommendations...</p>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -70,6 +71,7 @@ export default function RecommendationPage() {
         <div className="flex justify-center pt-10 bg-gradient-to-br from-blue-200 via-indigo-300 to-purple-400 text-white min-h-screen">
           <p className="text-lg text-white">Error: {error}</p>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -81,6 +83,7 @@ export default function RecommendationPage() {
         <div className="flex justify-center pt-10 bg-gradient-to-br from-blue-200 via-indigo-300 to-purple-400 text-white min-h-screen">
           <p className="text-lg">No user to see history, please log in or register to start saving the recommendations.</p>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -131,6 +134,33 @@ export default function RecommendationPage() {
           </div>
         )}
       </div>
+      <Footer />
     </>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="bg-gray-800 bg-opacity-80 text-gray-300 text-center fixed bottom-0 w-full">
+      This app uses data from Spotify Tracks Dataset by
+      <a
+        href="https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-400 underline ml-1"
+      >
+        Maharshi Pandya
+      </a>
+      , licensed under the 
+      <a
+        href="https://opendatacommons.org/licenses/odbl/1-0/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-400 underline ml-1"
+      >
+        Open Database License (ODbL)
+      </a>
+      .
+    </footer>
   );
 }

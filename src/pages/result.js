@@ -278,9 +278,14 @@ export default function SliderPage({ id }) {
     const getRecommendations = async (title, artist) => {
       if (isLoaded){
         try {
+          let user = "No user";
+          if (userOnline){
+            user = uid;}
+
           console.log("Fetching recommendations...");
+          console.log(user);
           const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/getRecommendations`);
-          const params = { title, artist };
+          const params = { title, artist, user};
           url.search = new URLSearchParams(params).toString();
     
           const response = await fetch(url, {
@@ -291,12 +296,11 @@ export default function SliderPage({ id }) {
           });
     
           const recommendationsData = await response.json();
+          console.log(recommendationsData)
           const forRecommendations = Object.keys(recommendationsData.track_name).map((key) => ({
             track_name: recommendationsData.track_name[key],
             genre: recommendationsData.track_genre[key],
             artist: recommendationsData.artists[key],
-            popularity: recommendationsData.popularity[key],
-            similarity: recommendationsData.similarity[key],
           }));
   
           localStorage.setItem("recommendationsLData", JSON.stringify(forRecommendations));
@@ -309,9 +313,9 @@ export default function SliderPage({ id }) {
             setRecommendationsOnline(false);
           }
         } 
-      catch (error) {
-        console.error("Error fetching recommendations:", error);
-        setRecommendationsOnline(false);
+        catch (error) {
+            console.error("Error fetching recommendations:", error);
+          setRecommendationsOnline(false);
       }
     }
     };
@@ -335,8 +339,6 @@ export default function SliderPage({ id }) {
                 <th className="p-3 text-left">Track Name</th>
                 <th className="p-3 text-left">Genre</th>
                 <th className="p-3 text-left">Artist</th>
-                <th className="p-3 text-left">Popularity</th>
-                <th className="p-3 text-left">Similarity</th>
               </tr>
             </thead>
             <tbody>
@@ -351,8 +353,6 @@ export default function SliderPage({ id }) {
                     <td className="p-3 text-black">{item.track_name}</td>
                     <td className="p-3 text-black">{item.genre}</td>
                     <td className="p-3 text-black">{item.artist}</td>
-                    <td className="p-3 text-black">{item.popularity}</td>
-                    <td className="p-3 text-black">{item.similarity}</td>
                   </tr>
                 ))
               ) : (
